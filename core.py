@@ -126,6 +126,13 @@ def read_from_csv(filename):
 
     return file_list
 
+def find_duplicates(iterable):
+    '''
+    Function that finds duplicate files in Books list.
+
+    zastanowić się  - co uznać za duplikat 
+    '''
+    pass
 
 if __name__ == "__main__":
     path = '/home/niedzwiedx/Dokumenty/rpg/'
