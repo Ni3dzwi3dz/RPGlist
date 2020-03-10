@@ -9,11 +9,11 @@ Core file of RPGList. Includes main functionalities of the project:
 TODO:
 -GUI
 -DTRPG Parser
-
--Add attributes
+-Allow adding attributes
 -different language versions
 -option to add/exclude formats
 -save_settings()
+-find_duplicates()
 
 
 save_to_csv:
