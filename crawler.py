@@ -8,13 +8,13 @@ import re
 from bs4 import BeautifulSoup
 from difflib import SequenceMatcher
 
-def check_title(pattern,title,threshold=0.65):
+def check_title(pattern,title,threshold=0.6):
     #Checks if examined title is close enough to what we are searching for
     #INPUT: pattern - pattern we`re looking for, title - title to examine
     #       threshold - minimum similarity level
     #OUTPUT: True if similarity is above threshold, False if not
 
-    if SequenceMatcher(pattern,title).ratio() >= threshold:
+    if SequenceMatcher(None,pattern,title).ratio() >= threshold:
         return True
     
     else:
@@ -41,20 +41,22 @@ class DTCrawler():
         try:
             req = requests.get(this_url)
         
+        #Add exception handling here, with error codes and stuffs 
         except requests.exceptions.RequestException:
             return None
 
         site = BeautifulSoup(req.text, 'html.parser')
 
-        #Do tego dopisz if-a ze sprawdzeniem link.attrs['title']
-        #za pomocą funkcji spoza klasy
-        #Taka funkcja check_title(title, attr) zwraca bool-a
-        
+           
         for link in site.find_all('a',
                  {'href' : re.compile('https://www.drivethrurpg.com/product/'),
                  'title' : True}):
             
-            if check_title(self.title,link.attr['title']):
+         
+            print(link.attrs['title'])
+          
+            if check_title(self.title,link.attrs['title']):
+            
                 links.append(link.attrs['href'])
 
 
@@ -68,6 +70,8 @@ class DTCrawler():
 if __name__ == "__main__":
     
     testowy = DTCrawler(title='Tales from the loop')
+    print(check_title('Tales from the loop', 'Tales from the Loop RPG: Rulebook'))
+    print(SequenceMatcher(None,'Tales from the loop', 'Tales from the Loop RPG').ratio())
 
     testowy.getPage()
     
