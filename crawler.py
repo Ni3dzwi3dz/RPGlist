@@ -19,6 +19,7 @@ class DTCrawler():
     def getPage(self):
         #Opens searchpage and returns links to product pages
 
+        links = []
         this_url = self.search_url + "+".join(self.title.split())
 
         try:
@@ -29,12 +30,19 @@ class DTCrawler():
 
         site = BeautifulSoup(req.text, 'html.parser')
 
-        #Do tego comprehension dopisz if-a ze sprawdzeniem link.attrs['title']
+        #Do tego dopisz if-a ze sprawdzeniem link.attrs['title']
         #za pomocą funkcji spoza klasy
         #Taka funkcja check_title(title, attr) zwraca bool-a
-        links = [link.attrs['href'] for link in site.find_all('a',
+        
+        for link in site.find_all('a',
                  {'href' : re.compile('https://www.drivethrurpg.com/product/'),
-                 'title' : True})]
+                 'title' : True}):
+            
+            if check_title(title,link.attr['title']):
+                links.append(link.attrs['href'])
+
+
+      
         print(links)
         print(len(links))
 
