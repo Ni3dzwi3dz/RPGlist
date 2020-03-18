@@ -6,6 +6,22 @@ Web crawler to use with DriveThruRPG.com
 import requests
 import re
 from bs4 import BeautifulSoup
+from difflib import SequenceMatcher
+
+def check_title(pattern,title,threshold=0.65):
+    #Checks if examined title is close enough to what we are searching for
+    #INPUT: pattern - pattern we`re looking for, title - title to examine
+    #       threshold - minimum similarity level
+    #OUTPUT: True if similarity is above threshold, False if not
+
+    if SequenceMatcher(pattern,title).ratio() >= threshold:
+        return True
+    
+    else:
+        return False
+
+    
+
 
 class DTCrawler():
 
@@ -38,7 +54,7 @@ class DTCrawler():
                  {'href' : re.compile('https://www.drivethrurpg.com/product/'),
                  'title' : True}):
             
-            if check_title(title,link.attr['title']):
+            if check_title(self.title,link.attr['title']):
                 links.append(link.attrs['href'])
 
 
