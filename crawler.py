@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 '''
 Web crawler to use with DriveThruRPG.com
+
 '''
 
 import requests
@@ -31,8 +32,9 @@ class DTCrawler():
         self.url = url
         self.search_url = search_url
         self.title = title
+        self.links = []
 
-    def getPage(self):
+    def getPages(self):
         #Opens searchpage and returns links to product pages
 
         links = []
@@ -51,20 +53,33 @@ class DTCrawler():
         for link in site.find_all('a',
                  {'href' : re.compile('https://www.drivethrurpg.com/product/'),
                  'title' : True}):
-            
-         
-            print(link.attrs['title'])
-          
+                      
             if check_title(self.title,link.attrs['title']):
             
                 links.append(link.attrs['href'])
 
+        self.links = links
 
-      
-        print(links)
-        print(len(links))
+        return links
+
+    def get_attributes(self, url):
+        #Function to get attributes (author, title, etc.) of a book on DTRG
+        #INPUT: url - link to product site
+        #OUTPUT: attrs - dictionary of attributes
+        
+        attrs = {}
+        req= requests.get(url)
+
+        site = BeautifulSoup(req.text, 'html.parser')
+
+        for item in zip(site.find_all('div',{'class' : 'widget-information-item-title'}),site.find_all('div',{'class' : 'widget-information-item-content'})):
+            attrs[item[0].text] = item[1].text
+            
+        return attrs     
+
 
         
+     
 
 
 if __name__ == "__main__":
@@ -73,7 +88,12 @@ if __name__ == "__main__":
     print(check_title('Tales from the loop', 'Tales from the Loop RPG: Rulebook'))
     print(SequenceMatcher(None,'Tales from the loop', 'Tales from the Loop RPG').ratio())
 
-    testowy.getPage()
+    testowy.getPages()
+
+    for link in testowy.links:
+
+        print(link)
+        testowy.get_attributes(link)
     
     pass
 

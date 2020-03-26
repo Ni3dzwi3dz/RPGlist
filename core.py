@@ -14,8 +14,7 @@ TODO:
 -find_duplicates()
 
 Book class:
--DTRPG Parser
--Allow adding attributes
+    -Allow adding attributes
 
 
 save_to_csv:
