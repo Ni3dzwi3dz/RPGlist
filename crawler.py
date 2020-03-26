@@ -74,6 +74,14 @@ class DTCrawler():
 
         for item in zip(site.find_all('div',{'class' : 'widget-information-item-title'}),site.find_all('div',{'class' : 'widget-information-item-content'})):
             attrs[item[0].text] = item[1].text
+
+        for item in site.find_all('span', {'itemprop' : 'name'}):
+            attrs[' Title '] = item.text
+
+        for item in site.find_all('meta', {'itemprop' : 'name'}):
+            attrs[' Publisher '] = item.attrs['content']
+
+        print(attrs)
             
         return attrs     
 

@@ -30,6 +30,7 @@ from csv import DictWriter, DictReader
 from bs4 import BeautifulSoup
 from PyPDF2 import PdfFileReader
 from re import findall
+import crawler
 
 
 #List of e-books extensions to be considered
@@ -80,6 +81,32 @@ class Book():
     def DTRPG_check(self):
         #Checks if the file is sold on DriveThruRPG.com. If yes, the attributes
         #are read from page and updated
+
+        check = crawler.DTCrawler(title = self.attributes['title'])
+
+        check.getPages()
+
+
+        for link in check.links:
+            attrs = check.get_attributes(link)
+
+            if attrs[' Pages '] in range((self.attributes['pages']-10),
+                                         (self.attributes['pages']+10)):
+
+                self.attributes['title'] = attrs[' Title ']
+                self.attributes['author'] = attrs[' Author(s) ']
+                self.attributes['artist'] = attrs[' Artist(s) ']
+                self.attributes['publisher'] = attrs[ ' Publisher ']
+                self.attributes['catalog no'] = attrs[' Publisher Stock # ']
+                self.attributes['ISBN'] = attrs[' ISBN ']
+                
+                
+
+
+
+
+
+
         return True
 
 
@@ -117,7 +144,7 @@ class BooksList:
             else:
                 self.file_list += self.get_file_list(join(dirpath,item))
 
-        return
+        return True
 
     def save_to_csv(self, filename='list.csv'):
         '''
