@@ -68,11 +68,15 @@ class DTCrawler():
         #OUTPUT: attrs - dictionary of attributes
         
         attrs = {}
+        
         req= requests.get(url)
-
         site = BeautifulSoup(req.text, 'html.parser')
 
-        for item in zip(site.find_all('div',{'class' : 'widget-information-item-title'}),site.find_all('div',{'class' : 'widget-information-item-content'})):
+        for item in zip(site.find_all('div',
+                            {'class' : 'widget-information-item-title'}),
+                        site.find_all('div',
+                            {'class' :'widget-information-item-content'})):
+
             attrs[item[0].text] = item[1].text
 
         for item in site.find_all('span', {'itemprop' : 'name'}):
@@ -80,9 +84,12 @@ class DTCrawler():
 
         for item in site.find_all('meta', {'itemprop' : 'name'}):
             attrs[' Publisher '] = item.attrs['content']
+        
+        attrs.pop(' Format ')
+        attrs.pop(' ')
+        attrs.pop(' Social ')
+        attrs.pop(' File Last Updated: ')
 
-        print(attrs)
-            
         return attrs     
 
 

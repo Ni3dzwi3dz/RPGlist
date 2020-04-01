@@ -16,7 +16,8 @@ TODO:
 Book class:
     -Allow adding attributes
 
-
+Booklist:
+    -list of attributes, passed to save_to_csv
 save_to_csv:
     -check if file exists, confirm to overwrite
     -Open to append, if file has headers, do not write them
@@ -28,7 +29,7 @@ from os import listdir
 from os.path import join, isfile, splitext, basename, getsize
 from csv import DictWriter, DictReader
 from bs4 import BeautifulSoup
-from PyPDF2 import PdfFileReader
+from pikepdf import Pdf
 from re import findall
 import crawler
 
@@ -56,57 +57,55 @@ class Book():
         self.attributes['system'] = ''
         self.attributes['year'] = 0
         self.attributes['publisher'] =''
-        self.attributes['size']= size
+        self.attributes['size']= size/(1000000)
+        self.attributes['pages']= 0
     
     def pdf_read(self):
         #Reads additional attributes from PDF XMP metadata and assigns them to
         #self.attributes
         
         if self.attributes['format']=='.pdf':
+            try:
+                reader = Pdf.open(self.attributes['path'])
+            except:
+                
+                return False
             
-            reader = PdfFileReader(self.attributes['path'])
 
-            self.attributes['pages'] = reader.getNumPages()
+            self.attributes['pages'] = len(reader.pages)
 
-            info = reader.getDocumentInfo()
+
+
+            info = reader.docinfo
 
             if info:
-                if info.author:
-                    self.attributes['author'] = info.author
-                if info.title:
-                    self.attributes['title'] = info.title
+                if '/Author' in info.keys():
+                    self.attributes['author(s)'] = str(info['/Author'])
+                if '/Title' in info.keys():
+                    self.attributes['title'] = str(info['/Title'])
         
-        pass
+        return True
+
+
 
     def DTRPG_check(self):
         #Checks if the file is sold on DriveThruRPG.com. If yes, the attributes
         #are read from page and updated
 
-        check = crawler.DTCrawler(title = self.attributes['title'])
+        check = crawler.DTCrawler(title = str(self.attributes['title']))
 
         check.getPages()
-
 
         for link in check.links:
             attrs = check.get_attributes(link)
 
-            if attrs[' Pages '] in range((self.attributes['pages']-10),
-                                         (self.attributes['pages']+10)):
-
-                self.attributes['title'] = attrs[' Title ']
-                self.attributes['author'] = attrs[' Author(s) ']
-                self.attributes['artist'] = attrs[' Artist(s) ']
-                self.attributes['publisher'] = attrs[ ' Publisher ']
-                self.attributes['catalog no'] = attrs[' Publisher Stock # ']
-                self.attributes['ISBN'] = attrs[' ISBN ']
+            if  int(attrs[' Pages ']) in range((self.attributes['pages']-10),
+                                               (self.attributes['pages']+10)):
+        
+                for key in attrs.keys():
+                    self.attributes[key.lower().strip()] = attrs[key]
+           
                 
-                
-
-
-
-
-
-
         return True
 
 
@@ -116,6 +115,7 @@ class BooksList:
     def __init__(self,path=''):
         self.path = path
         self.file_list = []
+        self.attr_list = []
 
     def get_file_list(self,dirpath=''):
         '''
@@ -142,9 +142,19 @@ class BooksList:
                                           size=getsize(join(dirpath,item)))
                                           )
             else:
-                self.file_list += self.get_file_list(join(dirpath,item))
+
+                self.get_file_list(join(dirpath,item))
 
         return True
+
+    def update_attrs(self):
+
+        for item in self.file_list:
+            self.attr_list += [x for x in item.attributes.keys() if x not in 
+                                self.attr_list]
+
+        print(self.attr_list)
+
 
     def save_to_csv(self, filename='list.csv'):
         '''
@@ -159,9 +169,9 @@ class BooksList:
 
         '''
         with open(filename,mode='w') as target_file:
-            fieldnames = self.file_list[0].attributes.keys()
+            
             file_writer= DictWriter(target_file,delimiter = ',', quotechar = '"',
-            fieldnames=fieldnames)
+            fieldnames=self.attr_list)
 
             file_writer.writeheader()
             for item in self.file_list:
@@ -212,6 +222,12 @@ if __name__ == "__main__":
 
     new_list.get_file_list()
     
+    for book in new_list.file_list:
+
+        book.pdf_read()
+        book.DTRPG_check()
+    
+    new_list.update_attrs()
     new_list.save_to_csv()
 
     
