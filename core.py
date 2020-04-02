@@ -15,6 +15,8 @@ TODO:
 
 Book class:
     -Allow adding attributes
+    -Add function to check for DTRPG - by pages OR filesize
+    -Add "mark" for guessed attributes
 
 Booklist:
     -list of attributes, passed to save_to_csv
